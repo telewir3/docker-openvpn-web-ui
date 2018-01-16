@@ -13,13 +13,15 @@ ADD opt/ /opt/openvpn-gui/
 ADD assets/app.conf /opt/openvpn-gui/conf/app.conf
 
 # update, install and cleaning
-RUN apt-get update && \
+RUN echo "## Installing base ##" && \
+    apt-get update && \
     apt-get install -y \
             curl \
             gnupg \
             easy-rsa \
     && chmod 755 /usr/share/easy-rsa/* \
     \
+    echo "## Installing tini ##" && \
     && set -x \
     && export TINI_HOME="/sbin/" \
     && curl -fSL "https://github.com/krallin/tini/releases/download/$TINI_VERSION/tini" -o "${TINI_HOME}/tini" \
@@ -38,6 +40,8 @@ EXPOSE 8080/tcp
 
 # place init
 ADD assets/start.sh /run.sh
+RUN chmod +x /run.sh
 
 # I personally like to start my containers with tini
-ENTRYPOINT ["/sbin/tini", "--", "/run.sh"]
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["run.sh"]
